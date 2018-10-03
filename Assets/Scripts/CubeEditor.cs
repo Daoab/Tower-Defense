@@ -4,25 +4,38 @@ using UnityEngine;
 
 [SelectionBase]
 [ExecuteInEditMode]
+[RequireComponent (typeof(Waypoint))] // This will add a Waypoint script to the gameobject if it does not have one yet
+
 public class CubeEditor : MonoBehaviour
 {
-    [SerializeField] [Tooltip("Adjust the snapping distance")][Range(1f,20f)] float gridSize = 10;
+    Waypoint waypoint;
 
-    TextMesh textMesh;
-
-    private void Start()
+    private void Awake()
     {
-        textMesh = GetComponentInChildren<TextMesh>();
+        waypoint = gameObject.GetComponent<Waypoint>();
     }
 
     void Update()
     {
-        Vector3 snapPos;
-        snapPos.x = Mathf.RoundToInt(transform.position.x / gridSize) * gridSize; // rounds the x coordinate of the gameobjecto and the sets it to the correct scale
-        snapPos.z = Mathf.RoundToInt(transform.position.z / gridSize) * gridSize;
-        transform.position = new Vector3(snapPos.x, 0, snapPos.z);
+        SnapPositionToGRid();
+        UpdateLabel();
+    }
 
-        string labelText = snapPos.x / gridSize + "," + snapPos.z / gridSize;
+    private void SnapPositionToGRid()
+    {
+        transform.position = new Vector3(
+                waypoint.GetGridPosition().x,
+                0,
+                waypoint.GetGridPosition().y
+            );
+    }
+
+    private void UpdateLabel()
+    {
+        TextMesh textMesh = GetComponentInChildren<TextMesh>();
+        int gridSize = waypoint.GetGridSize();
+
+        string labelText = waypoint.GetGridPosition().x / gridSize + "," + waypoint.GetGridPosition().y / gridSize;
         textMesh.text = labelText;
         gameObject.name = labelText;
     }
